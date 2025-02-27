@@ -1,3 +1,6 @@
+using aspnet_logger_backend.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace aspnet_logger_backend;
 
 public class Program {
@@ -5,6 +8,8 @@ public class Program {
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+        builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
         builder.Services.AddControllers();

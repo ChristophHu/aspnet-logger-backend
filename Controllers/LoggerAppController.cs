@@ -2,6 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using aspnet_logger_backend.Models;
 using aspnet_logger_backend.Data;
 using Microsoft.EntityFrameworkCore;
+using log4net;
+using aspnet_logger_backend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace aspnet_logger_backend.Controllers;
 
@@ -9,67 +15,97 @@ namespace aspnet_logger_backend.Controllers;
 [ApiController]
 public class LoggerAppController : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-    public LoggerAppController(ApplicationDbContext dbContext)
+    private ILog log = LogManager.GetLogger(typeof(LoggerAppController));
+
+    protected ConfigService _config;
+    protected DatabaseService _db;
+
+    public LoggerAppController(ConfigService configService, DatabaseService db)
     {
-        _dbContext = dbContext;
+        log.Debug("Initialisiere Controller");
+        this._config = configService;
+        this._db = db;
     }
 
-    [HttpGet]
+    //private readonly ApplicationDbContext _dbContext;
+    //public LoggerAppController(ApplicationDbContext dbContext)
+    //{
+    //    _dbContext = dbContext;
+    //}
+
+    [HttpGet("test/get")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    [EnableCors]
     public IActionResult ReadLog()
     {
-        return Ok(_dbContext.Logentrys.ToList());
-    }
-
-    [HttpGet("{id}")]
-    public IActionResult ReadLogEntry(int id)
-    {
-        var logentry = _dbContext.Logentrys.Find(id);
-        if (logentry == null)
+        try
         {
-            return NotFound();
+            string error;
+            object[] data = _db.getAll(out error);
+            if (data != null && error == null)
+            {
+                return Ok(data);
+            }
+            return Ok("Test");
+            //return Ok(_dbContext.Logentrys.ToList());
         }
-        return Ok(logentry);
-    }
-
-    [HttpPost]
-    public IActionResult CreateLogEntry([FromBody] Logentry logentry)
-    {
-        _dbContext.Logentrys.Add(logentry);
-        _dbContext.SaveChanges();
-        return CreatedAtAction(nameof(CreateLogEntry), new { id = logentry.id }, logentry);
-    }
-
-    [HttpPut]
-    public ActionResult UpdateLogEntry(int id, [FromBody] Logentry logentry)
-    {
-        var logentryInDb = _dbContext.Logentrys.Find(id);
-        if (logentryInDb == null)
+        catch
         {
-            return NotFound();
+            return BadRequest();
         }
-
-        logentryInDb.Message = logentry.Message;
-
-        _dbContext.SaveChanges();
-        return Ok();
+        
     }
 
-    [HttpDelete]
-    public ActionResult DeleteLogEntry(int id)
-    {
-        var logentry = _dbContext.Logentrys.Find(id);
-        if (logentry == null)
-        {
-            return NotFound();
-        }
+    //[HttpGet("{id}")]
+    //public IActionResult ReadLogEntry(int id)
+    //{
+    //    var logentry = _dbContext.Logentrys.Find(id);
+    //    if (logentry == null)
+    //    {
+    //        return NotFound();
+    //    }
+    //    return Ok(logentry);
+    //}
 
-        _dbContext.Logentrys.Remove(logentry);
-        _dbContext.SaveChanges();
-        return Ok();
-    }
+    //[HttpPost]
+    //public IActionResult CreateLogEntry([FromBody] Logentry logentry)
+    //{
+    //    _dbContext.Logentrys.Add(logentry);
+    //    _dbContext.SaveChanges();
+    //    return CreatedAtAction(nameof(CreateLogEntry), new { id = logentry.id }, logentry);
+    //}
+
+    //[HttpPut]
+    //public ActionResult UpdateLogEntry(int id, [FromBody] Logentry logentry)
+    //{
+    //    var logentryInDb = _dbContext.Logentrys.Find(id);
+    //    if (logentryInDb == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    logentryInDb.Message = logentry.Message;
+
+    //    _dbContext.SaveChanges();
+    //    return Ok();
+    //}
+
+    //[HttpDelete]
+    //public ActionResult DeleteLogEntry(int id)
+    //{
+    //    var logentry = _dbContext.Logentrys.Find(id);
+    //    if (logentry == null)
+    //    {
+    //        return NotFound();
+    //    }
+
+    //    _dbContext.Logentrys.Remove(logentry);
+    //    _dbContext.SaveChanges();
+    //    return Ok();
+    //}
 }
 

@@ -11,7 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace aspnet_logger_backend.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class LoggerAppController : ControllerBase
 {
@@ -33,7 +33,19 @@ public class LoggerAppController : ControllerBase
     //    _dbContext = dbContext;
     //}
 
-    [HttpGet("test/get")]
+    [HttpGet("info")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [EnableCors]
+    public ActionResult<ApiInfo> info()
+    {
+        ApiInfo apiInfo = new ApiInfo();
+        apiInfo.Name = this._config.get("api:name");
+        apiInfo.Version = this._config.get("api:version");
+        apiInfo.Date = DateTime.Now;
+        return Ok(apiInfo);
+    }
+
+    [HttpGet("get")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

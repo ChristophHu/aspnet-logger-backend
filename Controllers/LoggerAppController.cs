@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using aspnet_logger_backend.Models;
 using aspnet_logger_backend.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace aspnet_logger_backend.Controllers;
 
@@ -33,7 +35,7 @@ public class LoggerAppController : ControllerBase
     //    _dbContext = dbContext;
     //}
 
-    [HttpGet("info")]
+    [HttpGet("/info")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [EnableCors]
     public ActionResult<ApiInfo> info()
@@ -45,7 +47,7 @@ public class LoggerAppController : ControllerBase
         return Ok(apiInfo);
     }
 
-    [HttpGet("get")]
+    [HttpGet("/get")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -83,41 +85,116 @@ public class LoggerAppController : ControllerBase
     //    return Ok(logentry);
     //}
 
-    //[HttpPost]
-    //public IActionResult CreateLogEntry([FromBody] Logentry logentry)
-    //{
-    //    _dbContext.Logentrys.Add(logentry);
-    //    _dbContext.SaveChanges();
-    //    return CreatedAtAction(nameof(CreateLogEntry), new { id = logentry.id }, logentry);
-    //}
+    [HttpPost("/insert")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [EnableCors]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public IActionResult insert([FromBody] Logentry logentry)
+    {
+        try
+        {
+            // JSON in einen String serialisieren
+            //string requestString = jdata.GetRawText();
 
-    //[HttpPut]
-    //public ActionResult UpdateLogEntry(int id, [FromBody] Logentry logentry)
-    //{
-    //    var logentryInDb = _dbContext.Logentrys.Find(id);
-    //    if (logentryInDb == null)
-    //    {
-    //        return NotFound();
-    //    }
+            string error;
+            //string result = null;
 
-    //    logentryInDb.Message = logentry.Message;
+            //log.Debug(requestString);
 
-    //    _dbContext.SaveChanges();
-    //    return Ok();
-    //}
+            //JObject jrequest = JObject.Parse(requestString);
 
-    //[HttpDelete]
-    //public ActionResult DeleteLogEntry(int id)
-    //{
-    //    var logentry = _dbContext.Logentrys.Find(id);
-    //    if (logentry == null)
-    //    {
-    //        return NotFound();
-    //    }
+            //string data = (string)jrequest["data"];
 
-    //    _dbContext.Logentrys.Remove(logentry);
-    //    _dbContext.SaveChanges();
-    //    return Ok();
-    //}
+            string idResult;
+            if ((idResult = _db.insertOrUpdateData(null, logentry.data, out error)) != null)
+            {
+                return Ok(idResult);
+            }
+            else
+            {
+                return Problem(
+                    detail: error,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            log.Error(ex.Message);
+            return Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
+    [HttpPatch("/update")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [EnableCors]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public IActionResult update([FromBody] Logentry logentry)
+    {
+        try
+        {
+            string error;
+
+            string idResult;
+            if ((idResult = _db.insertOrUpdateData(logentry.id, logentry.data, out error)) != null)
+            {
+                return Ok(idResult);
+            }
+            else
+            {
+                return Problem(
+                    detail: error,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            log.Error(ex.Message);
+            return Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
+
+    [HttpDelete("/delete")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [EnableCors]
+    public IActionResult delete(string id)
+    {
+        try
+        {
+            string error;
+            if (_db.deleteData(id, out error))
+            {
+                return Ok("Daten gelöscht");
+            }
+            else
+            {
+                return Problem(
+                    detail: error,
+                    statusCode: StatusCodes.Status500InternalServerError
+                );
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            log.Error(ex.Message);
+            return Problem(
+                detail: ex.Message,
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
+    }
 }
 

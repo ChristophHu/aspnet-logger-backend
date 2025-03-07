@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using aspnet_logger_backend.Models;
 using log4net;
 using Microsoft.Win32.SafeHandles;
 using SimpleImpersonation;
@@ -253,9 +254,8 @@ public class DatabaseService
         }
     }
 
-    public string insertOrUpdateData(string id, string data, out string error)
+    public string insertOrUpdateData(string? id, string data, out string error)
     {
-
         try
         {
             var fkt = () =>
@@ -266,7 +266,6 @@ public class DatabaseService
                     {
                         id = Guid.NewGuid().ToString();
                     }
-
 
                     string sql = "BEGIN TRAN" +
                                 " SET DATEFORMAT ymd;" +

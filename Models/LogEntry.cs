@@ -6,11 +6,14 @@ namespace aspnet_logger_backend.Models;
 public class Logentry
 {
     [Required]
-    public int id { get; set; }
+    public string? id { get; set; }
 
-    [Required]
-    public DateTime CreatedAt { get; set; }
+    //[Required]
+    //public DateTime CreatedAt { get; set; }
+
+    //[AllowNull]
+    //public string Message { get; set; }
 
     [AllowNull]
-    public string Message { get; set; }
+    public string data { get; set; }
 }

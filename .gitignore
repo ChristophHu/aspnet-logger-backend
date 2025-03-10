@@ -17,6 +17,9 @@ project.lock.json
 
 # Build results
 obj/*
+bin/*
+[Bb]in/
+[Oo]bj/
 **/Debug/*
 **/Release/*
 [Dd]ebug/
@@ -27,8 +30,6 @@ x64/
 x86/
 build/
 bld/
-[Bb]in/
-[Oo]bj/
 msbuild.log
 msbuild.err
 msbuild.wrn

@@ -16,6 +16,9 @@ project.lock.json
 *.sln.docstates
 
 # Build results
+obj/*
+**/Debug/*
+**/Release/*
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -26,7 +29,6 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
-obj/*
 msbuild.log
 msbuild.err
 msbuild.wrn

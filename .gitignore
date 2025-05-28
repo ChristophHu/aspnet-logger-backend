@@ -18,14 +18,8 @@ project.lock.json
 # Build results
 obj/*
 bin/*
-[Bb]in/
-[Oo]bj/
 **/Debug/*
 **/Release/*
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
 x64/
 x86/
 build/

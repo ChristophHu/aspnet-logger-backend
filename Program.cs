@@ -1,13 +1,7 @@
-//using aspnet_logger_backend.Data;
 using aspnet_logger_backend.Services;
-
 using log4net.Config;
 using Microsoft.IdentityModel.Logging;
-
 using aspnet_logger_backend.Utils;
-
-//using Microsoft.EntityFrameworkCore;
-
 using ConfigurationManager = Microsoft.Extensions.Configuration.ConfigurationManager;
 
 namespace aspnet_logger_backend;
